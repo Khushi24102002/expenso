@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, PlusCircle, Lightbulb } from 'lucide-react-native';
+import { Home, PlusCircle, Lightbulb, List } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 
 export default function TabLayout() {
@@ -37,6 +37,15 @@ export default function TabLayout() {
           title: 'Add',
           tabBarIcon: ({ size, color }) => (
             <PlusCircle size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="transactions"
+        options={{
+          title: 'Transactions',
+          tabBarIcon: ({ size, color }) => (
+            <List size={size} color={color} strokeWidth={2} />
           ),
         }}
       />

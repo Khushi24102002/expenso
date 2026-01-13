@@ -8,7 +8,7 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { PieChart, LineChart } from 'react-native-chart-kit';
 import { TrendingUp, TrendingDown, Sparkles } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
@@ -74,7 +74,7 @@ export default function HomeScreen() {
   };
 
   const dailySpending = getDailySpending();
-  const recentTransactions = transactions.slice(0, 5);
+  const recentTransactions = transactions.slice(0, 4);
 
   const pieChartData = categoryData.map((item) => ({
     name: item.category,
@@ -191,33 +191,49 @@ export default function HomeScreen() {
       )}
 
       <View style={styles.recentSection}>
-        <Text style={styles.sectionTitle}>Recent Transactions</Text>
+        <View style={styles.recentHeader}>
+          <Text style={styles.sectionTitle}>Recent Transactions</Text>
+          {transactions.length > 4 && (
+            <TouchableOpacity onPress={() => router.push('/(tabs)/transactions')}>
+              <Text style={styles.viewAllLink}>View All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         {recentTransactions.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No transactions yet</Text>
             <Text style={styles.emptySubtext}>Add your first transaction to get started!</Text>
           </View>
         ) : (
-          recentTransactions.map((transaction) => (
-            <View key={transaction.id} style={styles.transactionItem}>
-              <View style={styles.transactionLeft}>
-                <Text style={styles.transactionCategory}>{transaction.category}</Text>
-                <Text style={styles.transactionDate}>
-                  {format(new Date(transaction.created_at), 'MMM d, yyyy')}
+          <>
+            {recentTransactions.map((transaction) => (
+              <View key={transaction.id} style={styles.transactionItem}>
+                <View style={styles.transactionLeft}>
+                  <Text style={styles.transactionCategory}>{transaction.category}</Text>
+                  <Text style={styles.transactionDate}>
+                    {format(new Date(transaction.created_at), 'MMM d, yyyy')}
+                  </Text>
+                  {transaction.note && (
+                    <Text style={styles.transactionNote}>{transaction.note}</Text>
+                  )}
+                </View>
+                <Text
+                  style={[
+                    styles.transactionAmount,
+                    transaction.type === 'income' ? styles.incomeAmount : styles.expenseAmount,
+                  ]}>
+                  {transaction.type === 'income' ? '+' : '-'}${Number(transaction.amount).toFixed(2)}
                 </Text>
-                {transaction.note && (
-                  <Text style={styles.transactionNote}>{transaction.note}</Text>
-                )}
               </View>
-              <Text
-                style={[
-                  styles.transactionAmount,
-                  transaction.type === 'income' ? styles.incomeAmount : styles.expenseAmount,
-                ]}>
-                {transaction.type === 'income' ? '+' : '-'}${Number(transaction.amount).toFixed(2)}
-              </Text>
-            </View>
-          ))
+            ))}
+            {transactions.length > 4 && (
+              <View style={styles.moreTransactionsHint}>
+                <Text style={styles.hintText}>
+                  {transactions.length - 4} more transaction{transactions.length - 4 !== 1 ? 's' : ''} • Tap "View All"
+                </Text>
+              </View>
+            )}
+          </>
         )}
       </View>
 
@@ -347,11 +363,21 @@ const styles = StyleSheet.create({
   recentSection: {
     padding: 24,
   },
+  recentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: 20,
     color: Colors.textPrimary,
-    marginBottom: 16,
+  },
+  viewAllLink: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 14,
+    color: Colors.primary,
   },
   emptyState: {
     alignItems: 'center',
@@ -408,6 +434,20 @@ const styles = StyleSheet.create({
   },
   expenseAmount: {
     color: Colors.expense,
+  },
+  moreTransactionsHint: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    alignItems: 'center',
+  },
+  hintText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 13,
+    color: Colors.textSecondary,
   },
   bottomSpacer: {
     height: 40,
